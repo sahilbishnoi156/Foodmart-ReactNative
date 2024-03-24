@@ -1,9 +1,6 @@
-import OrderLists from "@/src/components/Orders/OrderLists";
-import { Stack } from "expo-router";
+import OrderAdminLists from "@/src/components/Orders/OrderLists";
+import React from "react";
+
 export default function MenuScreen() {
-  return (
-    <>
-      <OrderLists />
-    </>
-  );
+  return <OrderAdminLists archived={false} />;
 }

@@ -2,11 +2,11 @@ import { FlatList, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { useCart } from "@/src/providers/CartProvider";
 import CartListItem from "./CartListItem";
-import Button from "../Button";
 import { router } from "expo-router";
+import { Button } from "@rneui/themed";
 
 const CartListItems = () => {
-  const { items, total } = useCart();
+  const { items, total, checkout } = useCart();
   return (
     <View>
       {items.length === 0 && (
@@ -19,9 +19,21 @@ const CartListItems = () => {
       />
       <Text>Total Price : ${total}</Text>
       {items.length === 0 ? (
-        <Button text="Buy Food" onPress={() => {router.push('/(user)/menu/')}} />
+        <Button
+          title="Buy Food"
+          onPress={() => {
+            router.push("/(user)/menu/");
+          }}
+          containerStyle={{ marginTop: 10 }}
+          radius={12}
+        />
       ) : (
-        <Button text="CheckOut" onPress={() => {}} />
+        <Button
+          title="CheckOut"
+          onPress={checkout}
+          containerStyle={{ marginTop: 10 }}
+          radius={12}
+        />
       )}
     </View>
   );

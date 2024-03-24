@@ -1,33 +1,32 @@
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import React from 'react';
-// import { Tables } from '../types';
 import RemoteImage from './RemoteImage';
 import { defaultPizzaImage } from '@/src/constants/ExtraVariables';
 import Colors from '@/src/constants/Colors';
+import { Tables } from '@/src/types';
 
-// type OrderItemListItemProps = {
-//   item: { products: Tables<'products'> } & Tables<'order_items'>;
-// };
+type OrderItemListItemProps = {
+  item: { products: Tables<'products'> | null} & Tables<'order_items'>;
+};
 
-const OrderItemListItem = ({ item }: any) => {
+const OrderItemListItem = ({ item }: OrderItemListItemProps) => {
   return (
     <View style={styles.container}>
       <RemoteImage
-        path={item.products.image}
+        path={item?.products?.image}
         fallback={defaultPizzaImage}
         style={styles.image}
         resizeMode="contain"
       />
-
       <View style={{ flex: 1 }}>
-        <Text style={styles.title}>{item.products.name}</Text>
+        <Text style={styles.title}>{item?.products?.name}</Text>
         <View style={styles.subtitleContainer}>
-          <Text style={styles.price}>${item.products.price.toFixed(2)}</Text>
-          <Text>Size: {item.size}</Text>
+          <Text style={styles.price}>${item?.products?.price.toFixed(2)}</Text>
+          <Text>Size: {item?.size}</Text>
         </View>
       </View>
       <View style={styles.quantitySelector}>
-        <Text style={styles.quantity}>{item.quantity}</Text>
+        <Text style={styles.quantity}>{item?.quantity}</Text>
       </View>
     </View>
   );

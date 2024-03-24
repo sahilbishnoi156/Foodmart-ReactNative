@@ -1,6 +1,5 @@
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -12,8 +11,9 @@ import { defaultPizzaImage } from "@/src/constants/ExtraVariables";
 import { useCart } from "@/src/providers/CartProvider";
 import { useProduct } from "@/src/api/products";
 import { PizzaSize } from "@/src/types";
-import { Button } from "@rneui/themed";
+import { Button, Image } from "@rneui/themed";
 import Colors from "@/src/constants/Colors";
+import RemoteImage from "@/src/components/Orders/RemoteImage";
 
 const sizes: PizzaSize[] = ["S", "M", "L", "XL"];
 
@@ -24,15 +24,17 @@ const ProductDetailScreen = () => {
   //! Custom Hook
   const { data: product, isLoading, error } = useProduct(id);
   const { addItem, items } = useCart();
-  
+
   //! Local States
   const [selectedSize, setSelectedSize] = React.useState<PizzaSize>("S");
-  const isAlreadyAdded = items.find((item) => (item.product_id === id) && item.size === selectedSize);
+  const isAlreadyAdded = items.find(
+    (item) => item.product_id === id && item.size === selectedSize
+  );
 
   //! Add To Cart Function
   const handleCartButtonClick = () => {
-    if (!product) return; 
-    if(!isAlreadyAdded) addItem(product, selectedSize);
+    if (!product) return;
+    if (!isAlreadyAdded) addItem(product, selectedSize);
     router.push("/cart");
   };
 
@@ -73,12 +75,12 @@ const ProductDetailScreen = () => {
       </View>
     );
   }
-
   return (
     <View style={styles.container}>
       <Stack.Screen options={{ title: product?.name }} />
-      <Image
-        source={{ uri: product?.image || defaultPizzaImage }}
+      <RemoteImage
+        path={product.image}
+        fallback={defaultPizzaImage}
         style={styles.image}
         resizeMode="contain"
       />
@@ -115,7 +117,7 @@ const ProductDetailScreen = () => {
         color={Colors.light.tint}
         containerStyle={{ marginTop: 20 }}
       >
-        {isAlreadyAdded ? "Go to cart" : "Add to cart" }
+        {isAlreadyAdded ? "Go to cart" : "Add to cart"}
       </Button>
     </View>
   );

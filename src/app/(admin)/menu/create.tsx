@@ -20,6 +20,10 @@ import {
   useUpdateProduct,
 } from "@/src/api/products";
 import { Button } from "@rneui/themed";
+import * as FileSystem from "expo-file-system";
+import { randomUUID } from "expo-crypto";
+import { supabase } from "@/src/lib/supabase";
+import { decode } from "base64-arraybuffer";
 
 //* FORM validation
 const productSchema = Yup.object().shape({
@@ -69,7 +73,7 @@ const CreateProductScreen = () => {
   const { mutate: updateProduct } = useUpdateProduct();
 
   //! Create or update the product
-  const handleOnSubmit = (data: any) => {
+  const handleOnSubmit = async (data: any) => {
     setIsSubmitting(true);
     const newProduct = {
       ...product,
@@ -89,12 +93,16 @@ const CreateProductScreen = () => {
           },
         });
       } else {
-        insertProduct(newProduct, {
-          onSuccess: () => {
-            router.back();
-            setIsSubmitting(false);
-          },
-        });
+        const uploadedImage = await uploadImage();
+        insertProduct(
+          { ...newProduct, image: uploadedImage },
+          {
+            onSuccess: () => {
+              router.back();
+              setIsSubmitting(false);
+            },
+          }
+        );
       }
     } catch (error) {
       console.log(error);
@@ -113,6 +121,24 @@ const CreateProductScreen = () => {
     });
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+    }
+  };
+
+  const uploadImage = async () => {
+    if (!image?.startsWith("file://")) {
+      return;
+    }
+
+    const base64 = await FileSystem.readAsStringAsync(image, {
+      encoding: "base64",
+    });
+    const filePath = `${randomUUID()}.png`;
+    const contentType = "image/png";
+    const { data, error } = await supabase.storage
+      .from("product-images")
+      .upload(filePath, decode(base64), { contentType });
+    if (data) {
+      return data.path;
     }
   };
 

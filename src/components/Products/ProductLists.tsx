@@ -32,18 +32,20 @@ export default function ProductLists() {
   }
 
   if (error) {
-    <View
-      style={{
-        padding: 10,
-        justifyContent: "center",
-        alignItems: "center",
-        flex: 1,
-      }}
-    >
-      <Text style={{ fontSize: 20, fontWeight: "bold" }}>
-        Something Went Wrong
-      </Text>
-    </View>;
+    return (
+      <View
+        style={{
+          padding: 10,
+          justifyContent: "center",
+          alignItems: "center",
+          flex: 1,
+        }}
+      >
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          Something Went Wrong
+        </Text>
+      </View>
+    );
   }
 
   return (

@@ -1,7 +1,6 @@
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -14,6 +13,8 @@ import { FontAwesome } from "@expo/vector-icons";
 import Colors from "@/src/constants/Colors";
 import { useDeleteProduct, useProduct } from "@/src/api/products";
 import { Button, Icon } from "@rneui/base";
+import { Image } from "@rneui/themed";
+import RemoteImage from "@/src/components/Orders/RemoteImage";
 
 const ProductDetailScreen = () => {
   const { id: idString } = useLocalSearchParams();
@@ -110,8 +111,9 @@ const ProductDetailScreen = () => {
           },
         }}
       />
-      <Image
-        source={{ uri: product.image || defaultPizzaImage }}
+      <RemoteImage
+        path={product.image}
+        fallback={defaultPizzaImage}
         style={styles.image}
         resizeMode="contain"
       />

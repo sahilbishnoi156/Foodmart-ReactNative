@@ -34,7 +34,7 @@ export default function TabLayout() {
         headerShown: useClientOnlyValue(false, true),
       }}
     >
-      <Tabs.Screen name="index" options={{href: null}}/>
+      <Tabs.Screen name="index" options={{href: null, title: 'Food Mart'}}/>
       <Tabs.Screen
         name="menu"
         options={{

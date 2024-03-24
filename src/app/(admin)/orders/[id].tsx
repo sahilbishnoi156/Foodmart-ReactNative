@@ -1,83 +1,139 @@
-// import { useOrderDetails, useUpdateOrder } from '@/api/orders';
+import { useOrderDetails, useUpdateOrder } from "@/src/api/orders";
 // import { notifyUserAboutOrderUpdate } from '@/lib/notifications';
-import orders from '@/assets/data/orders';
-import OrderItemListItem from '@/src/components/Orders/OrderItemListItem';
-import OrderListItem from '@/src/components/Orders/OrderListItem';
-import Colors from '@/src/constants/Colors';
-import { OrderStatusList } from '@/src/types';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import OrderItemListItem from "@/src/components/Orders/OrderItemListItem";
+import OrderListItem from "@/src/components/Orders/OrderListItem";
+import Colors from "@/src/constants/Colors";
+import { OrderStatusList } from "@/src/types";
+import { Button } from "@rneui/themed";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import React from "react";
 import {
   FlatList,
   Text,
   View,
   Pressable,
   ActivityIndicator,
-} from 'react-native';
+  StyleSheet,
+} from "react-native";
 
 export default function OrderDetailsScreen() {
   const { id: idString } = useLocalSearchParams();
-  const id = parseFloat(typeof idString === 'string' ? idString : idString[0]);
-  const order = orders.find(order => order.id === id);
-  if(!order) return;
+  const id = parseFloat(typeof idString === "string" ? idString : idString[0]);
 
-  // const { data: order, isLoading, error } = useOrderDetails(id);
-  // const { mutate: updateOrder } = useUpdateOrder();
+  //! Custom Hooks
+  const { data: order, isLoading, error } = useOrderDetails(id);
+  const { mutate: updateOrder } = useUpdateOrder();
 
-  // const updateStatus = async (status: string) => {
-  //   await updateOrder({
-  //     id: id,
-  //     updatedFields: { status },
-  //   });
-  //   if (order) {
-  //     await notifyUserAboutOrderUpdate({ ...order, status });
-  //   }
-  // };
+  //! Local States
+  const [isUpdating, setIsUpdating] = React.useState(false);
+  const router = useRouter();
+  const totalPrice = order?.order_items.reduce(
+    (total, item) => (total += (item?.products?.price || 0) * item.quantity),
+    0
+  );
 
-  // if (isLoading) {
-  //   return <ActivityIndicator />;
-  // }
-  // if (error || !order) {
-  //   return <Text>Failed to fetch</Text>;
-  // }
+  //! Update Status
+  const updateStatus = async (status: string) => {
+    setIsUpdating(true);
+    updateOrder(
+      {
+        id: id,
+        updatedFields: { status },
+      },
+      {
+        onSuccess: async () => {
+          // if (order) {
+          //   await notifyUserAboutOrderUpdate({ ...order, status });
+          // }
+          setIsUpdating(false);
+        },
+      }
+    );
+  };
+
+  //! If product is loading
+  if (isLoading) {
+    return (
+      <View style={styles.otherContainer}>
+        <Stack.Screen options={{ title: "Loading" }} />
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
+
+  //! If there is an error
+  if (error || !order) {
+    return (
+      <View
+        style={{
+          padding: 10,
+          justifyContent: "center",
+          alignItems: "center",
+          flex: 1,
+        }}
+      >
+        <Stack.Screen options={{ title: "Invalid Order" }} />
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          Order Not Found
+        </Text>
+        <Button
+          onPress={() => router.back()}
+          radius={12}
+          raised
+          size="lg"
+          containerStyle={{ marginTop: 10 }}
+        >
+          Retry
+        </Button>
+      </View>
+    );
+  }
 
   return (
     <View style={{ padding: 10, gap: 20, flex: 1 }}>
-      <Stack.Screen options={{ title: `Order #${id}` }} />
-
+      <Stack.Screen
+        options={{
+          title: `Order #${id}`,
+          headerRight: () => {
+            if (isUpdating) {
+              return <ActivityIndicator color={"black"} />;
+            }else{
+              return <></>
+            }
+          },
+        }}
+      />
       <FlatList
         data={order.order_items}
         renderItem={({ item }) => <OrderItemListItem item={item} />}
         contentContainerStyle={{ gap: 10 }}
-        ListHeaderComponent={() => <OrderListItem order={order} />}
+        ListHeaderComponent={() => (
+          <>
+            <OrderListItem order={order} />
+            <Text style={styles.itemsHeading}>Purchaged Items</Text>
+          </>
+        )}
         ListFooterComponent={() => (
           <>
-            <Text style={{ fontWeight: 'bold' }}>Status</Text>
-            <View style={{ flexDirection: 'row', gap: 5 }}>
+            <Text style={styles.price}>Total Price: ${totalPrice}</Text>
+            <Text style={{ fontWeight: "bold" }}>Status</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                gap: 5,
+                paddingBottom: 20,
+                paddingTop: 5,
+              }}
+            >
               {OrderStatusList.map((status) => (
-                <Pressable
+                <Button
+                  title={status}
+                  type={order.status === status ? "solid" : "outline"}
+                  radius={8}
+                  disabled={isUpdating}
                   key={status}
-                  // onPress={() => updateStatus(status)}
-                  style={{
-                    borderColor: Colors.light.tint,
-                    borderWidth: 1,
-                    padding: 10,
-                    borderRadius: 5,
-                    marginVertical: 10,
-                    backgroundColor:
-                      order.status === status
-                        ? Colors.light.tint
-                        : 'transparent',
-                  }}
-                >
-                  <Text
-                    style={{
-                      color:
-                        order.status === status ? 'white' : Colors.light.tint,
-                    }}
-                  >
-                    {status}
-                  </Text>
-                </Pressable>
+                  onPress={() => updateStatus(status)}
+                />
               ))}
             </View>
           </>
@@ -86,3 +142,23 @@ export default function OrderDetailsScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  otherContainer: {
+    flex: 1,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  itemsHeading: {
+    fontSize: 17,
+    fontWeight: "500",
+    marginTop: 15,
+  },
+  price: {
+    marginBottom: 10,
+    fontSize: 15,
+    fontWeight: "600",
+    color: Colors.light.tint,
+  },
+});
