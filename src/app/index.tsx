@@ -11,7 +11,17 @@ const index = () => {
   const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
   if (loading) {
-    return <ActivityIndicator />;
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <ActivityIndicator size={'large'} />
+      </View>
+    );
   }
 
   if (!session) {

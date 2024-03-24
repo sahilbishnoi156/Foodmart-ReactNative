@@ -1,23 +1,25 @@
 import {
-  Alert,
   Image,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
 import React from "react";
-import Button from "@/src/components/Button";
 import * as Yup from "yup";
 import * as ImagePicker from "expo-image-picker";
 import { Formik } from "formik";
 import { defaultPizzaImage } from "@/src/constants/ExtraVariables";
 import { FontAwesome } from "@expo/vector-icons";
 import Colors from "@/src/constants/Colors";
-import { Stack, useLocalSearchParams } from "expo-router";
-import products from "@/assets/data/products";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
+import {
+  useInsertProduct,
+  useProduct,
+  useUpdateProduct,
+} from "@/src/api/products";
+import { Button } from "@rneui/themed";
 
 //* FORM validation
 const productSchema = Yup.object().shape({
@@ -30,22 +32,74 @@ const productSchema = Yup.object().shape({
 
 const CreateProductScreen = () => {
   //! Checking if product is updating or creating
-  const { id } = useLocalSearchParams();
+  const { id: idString } = useLocalSearchParams();
+  const id = parseFloat(
+    typeof idString === "string" ? idString : idString?.[0]
+  );
   const isUpdating = !!id;
-  const product = products.find((p) => p.id.toString() === id) || {
+
+  //! Initial Product
+  let product:
+    | {
+        created_at?: string;
+        id?: number;
+        image: string | null;
+        name: string;
+        price: number | string;
+      }
+    | undefined = {
     name: "",
-    price: 0,
+    price: "",
     image: "",
   };
+  if (id) {
+    const data = useProduct(id);
+    product = data.data;
+  }
+  const router = useRouter();
 
   //! Local States
   const [image, setImage] = React.useState<string>(
-    !isUpdating ? defaultPizzaImage : product?.image
+    !isUpdating ? defaultPizzaImage : product?.image || defaultPizzaImage
   );
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  //! Custom Hook
+  const { mutate: insertProduct } = useInsertProduct();
+  const { mutate: updateProduct } = useUpdateProduct();
 
   //! Create or update the product
   const handleOnSubmit = (data: any) => {
-    console.log(data);
+    setIsSubmitting(true);
+    const newProduct = {
+      ...product,
+      name: data.productName,
+      price: parseFloat(data.productPrice),
+      image: image,
+    };
+    try {
+      if (isUpdating) {
+        updateProduct(newProduct, {
+          onSuccess: () => {
+            router.back();
+            setIsSubmitting(false);
+          },
+          onError: (error) => {
+            throw new Error(error.message);
+          },
+        });
+      } else {
+        insertProduct(newProduct, {
+          onSuccess: () => {
+            router.back();
+            setIsSubmitting(false);
+          },
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      setIsSubmitting(false);
+    }
   };
 
   //! pickImage
@@ -60,18 +114,6 @@ const CreateProductScreen = () => {
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
-  };
-
-  //! HandleDeleteProduct
-  const handleDeleteProduct = () => {
-    console.warn("Product deleted");
-  };
-
-  const confirmDeleteProduct = () => {
-    Alert.alert("Confirm", "Are you sure want to delete this product?", [
-      { text: "Cancel" },
-      { text: "Delete", style: "destructive", onPress: handleDeleteProduct },
-    ]);
   };
 
   return (
@@ -104,12 +146,12 @@ const CreateProductScreen = () => {
       </View>
       <Formik
         initialValues={{
-          productName: product.name,
-          productPrice: product.price,
+          productName: product?.name,
+          productPrice: product?.price,
         }}
         validationSchema={productSchema}
         onSubmit={(values) => {
-            handleOnSubmit(values);
+          handleOnSubmit(values);
         }}
       >
         {({
@@ -118,7 +160,6 @@ const CreateProductScreen = () => {
           touched,
           isValid,
           handleChange,
-          handleReset,
           handleSubmit,
           /* and other goodies */
         }) => (
@@ -156,27 +197,24 @@ const CreateProductScreen = () => {
                 },
               ]}
               keyboardType="numeric"
-              value={values.productPrice.toString()}
+              value={values?.productPrice?.toString()}
               onChangeText={handleChange("productPrice")}
             />
             {touched.productPrice && errors.productPrice && (
               <Text style={styles.errorText}>{errors.productPrice}</Text>
             )}
-            <Pressable style={{ marginTop: 10 }}>
-              {({ pressed }) => (
-                <Button
-                  text={isUpdating ? "Update" : "Create"}
-                  onPress={() => handleSubmit()}
-                  disabled={!isValid}
-                  style={{
-                    backgroundColor: isValid ? Colors.light.tint : "#969595",
-                  }}
-                />
-              )}
-            </Pressable>
-            <Text style={styles.deleteButton} onPress={confirmDeleteProduct}>
-              Delete
-            </Text>
+            <Button
+              onPress={() => handleSubmit()}
+              radius={12}
+              loading={isSubmitting}
+              raised
+              disabled={!isValid}
+              size="lg"
+              color={isValid ? Colors.light.tint : ""}
+              containerStyle={{ marginTop: 20 }}
+            >
+              {isUpdating ? "Update" : "Create"}
+            </Button>
           </>
         )}
       </Formik>
@@ -203,6 +241,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 5,
+  },
+  deleteSkeleton: {
+    backgroundColor: Colors.light.tint,
+    padding: 15,
+    alignItems: "center",
+    borderRadius: 100,
+    marginVertical: 10,
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 4,
   },
   deleteButton: {
     color: "red",

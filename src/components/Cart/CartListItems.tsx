@@ -10,16 +10,16 @@ const CartListItems = () => {
   return (
     <View>
       {items.length === 0 && (
-        <Text style={styles.emptyCartText}>Nothing here</Text>
+        <Text style={styles.emptyCartText}>Cart is empty</Text>
       )}
       <FlatList
         data={items}
         renderItem={({ item }) => <CartListItem cartItem={item} />}
         contentContainerStyle={{ padding: 10, gap: 10 }}
       />
-      <Text>Total : {total}</Text>
+      <Text>Total Price : ${total}</Text>
       {items.length === 0 ? (
-        <Button text="Buy Food" onPress={() => {router.push('/menu/')}} />
+        <Button text="Buy Food" onPress={() => {router.push('/(user)/menu/')}} />
       ) : (
         <Button text="CheckOut" onPress={() => {}} />
       )}

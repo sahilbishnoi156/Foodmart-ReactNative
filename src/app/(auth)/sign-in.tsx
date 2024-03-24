@@ -1,19 +1,11 @@
-import {
-  Alert,
-  Image,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from "react-native";
+import { Alert, StyleSheet, Text, TextInput, View } from "react-native";
 import React from "react";
-import Button from "@/src/components/Button";
 import * as Yup from "yup";
 import { Formik } from "formik";
 import Colors from "@/src/constants/Colors";
 import { Link, Stack } from "expo-router";
 import { supabase } from "@/src/lib/supabase";
+import { Button } from "@rneui/themed";
 
 //* FORM validation
 const formSchema = Yup.object().shape({
@@ -25,11 +17,11 @@ const formSchema = Yup.object().shape({
 
 const CreateProductScreen = () => {
   //! Local states
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   //! handling signin
   const handleOnSubmit = async (data: any) => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     const { error } = await supabase.auth.signInWithPassword({
       email: data.email,
       password: data.password,
@@ -37,7 +29,7 @@ const CreateProductScreen = () => {
 
     if (error) {
       Alert.alert(error.message);
-      setIsSubmitting(false)
+      setIsSubmitting(false);
       return;
     }
   };
@@ -100,18 +92,18 @@ const CreateProductScreen = () => {
             {touched.password && errors.password && (
               <Text style={styles.errorText}>{errors.password}</Text>
             )}
-            <Pressable style={{ marginTop: 10 }}>
-              {({ pressed }) => (
-                <Button
-                  text={"Sign In"}
-                  onPress={() => handleSubmit()}
-                  disabled={!isValid || isSubmitting}
-                  style={{
-                    backgroundColor: isValid || !isSubmitting ? Colors.light.tint : "#969595",
-                  }}
-                />
-              )}
-            </Pressable>
+            <Button
+              onPress={() => handleSubmit()}
+              radius={14}
+              loading={isSubmitting}
+              raised
+              disabled={!isValid}
+              size="lg"
+              color={Colors.light.tint}
+              containerStyle={{ marginTop: 20 }}
+            >
+              Sign In
+            </Button>
             <Link href={"/(auth)/sign-up"} asChild>
               <Text style={styles.lowerButton}>Don't have an account?</Text>
             </Link>

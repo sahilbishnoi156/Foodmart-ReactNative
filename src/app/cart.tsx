@@ -12,7 +12,6 @@ const Cart = () => {
       <StatusBar
         animated={true}
         backgroundColor="#61dafb"
-        // hidden={true}
       />
     </View>
   );

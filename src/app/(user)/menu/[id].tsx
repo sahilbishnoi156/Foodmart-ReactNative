@@ -1,41 +1,84 @@
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import React from "react";
 import { Stack, router, useLocalSearchParams } from "expo-router";
-import products from "@/assets/data/products";
 import { defaultPizzaImage } from "@/src/constants/ExtraVariables";
-import AddToCartButton from "@/src/components/Button";
 import { useCart } from "@/src/providers/CartProvider";
+import { useProduct } from "@/src/api/products";
+import { PizzaSize } from "@/src/types";
+import { Button } from "@rneui/themed";
+import Colors from "@/src/constants/Colors";
 
-const sizes = ["S", "M", "L", "XL"];
+const sizes: PizzaSize[] = ["S", "M", "L", "XL"];
 
 const ProductDetailScreen = () => {
-  const props = useLocalSearchParams();
-  const product = products.find(({ id }) => id.toString() === props.id);
+  const { id: idString } = useLocalSearchParams();
+  const id = parseFloat(typeof idString === "string" ? idString : idString[0]);
 
-  const [selectedSize, setSelectedSize] = React.useState<
-    "S" | "M" | "L" | "XL"
-  >("S");
-  const { addItem } = useCart();
+  //! Custom Hook
+  const { data: product, isLoading, error } = useProduct(id);
+  const { addItem, items } = useCart();
+  
+  //! Local States
+  const [selectedSize, setSelectedSize] = React.useState<PizzaSize>("S");
+  const isAlreadyAdded = items.find((item) => (item.product_id === id) && item.size === selectedSize);
 
-  const addToCart = () => {
-    if(!product) return;
-    addItem(product, selectedSize);
-    router.push('/cart')
+  //! Add To Cart Function
+  const handleCartButtonClick = () => {
+    if (!product) return; 
+    if(!isAlreadyAdded) addItem(product, selectedSize);
+    router.push("/cart");
   };
 
-  if (!product) {
+  //! If product is loading
+  if (isLoading) {
     return (
-      <View style={styles.container}>
-        <Text>Product Not Found</Text>
+      <View style={styles.otherContainer}>
+        <Stack.Screen options={{ title: "Loading" }} />
+        <ActivityIndicator size={"large"} />
+      </View>
+    );
+  }
+
+  //! If there is an error
+  if (error || !product) {
+    return (
+      <View
+        style={{
+          padding: 10,
+          justifyContent: "center",
+          alignItems: "center",
+          flex: 1,
+        }}
+      >
+        <Stack.Screen options={{ title: "Invalid Product" }} />
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          Product Not Found
+        </Text>
+        <Button
+          onPress={() => router.back()}
+          radius={12}
+          raised
+          size="lg"
+          containerStyle={{ marginTop: 10 }}
+        >
+          Retry
+        </Button>
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ title: product.name }} />
+      <Stack.Screen options={{ title: product?.name }} />
       <Image
-        source={{ uri: product.image || defaultPizzaImage }}
+        source={{ uri: product?.image || defaultPizzaImage }}
         style={styles.image}
         resizeMode="contain"
       />
@@ -63,8 +106,17 @@ const ProductDetailScreen = () => {
           </Pressable>
         ))}
       </View>
-      <Text style={styles.price}>Price: ${product.price}</Text>
-      <AddToCartButton onPress={addToCart} text="Add to cart" />
+      <Text style={styles.price}>Price: ${product?.price}</Text>
+      <Button
+        onPress={handleCartButtonClick}
+        radius={14}
+        raised
+        size="lg"
+        color={Colors.light.tint}
+        containerStyle={{ marginTop: 20 }}
+      >
+        {isAlreadyAdded ? "Go to cart" : "Add to cart" }
+      </Button>
     </View>
   );
 };
@@ -75,6 +127,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
+  },
+  otherContainer: {
+    flex: 1,
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
   image: {
     width: "100%",
