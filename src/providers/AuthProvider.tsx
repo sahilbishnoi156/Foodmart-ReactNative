@@ -1,10 +1,11 @@
 import React, { PropsWithChildren, createContext, useContext } from "react";
 import { supabase } from "../lib/supabase";
 import { Session } from "@supabase/supabase-js";
+import { Tables } from "../types";
 
 type AuthData = {
   session: Session | null;
-  profile: any;
+  profile: Tables<"profiles"> | null;
   loading: boolean;
   isAdmin: boolean;
 };
@@ -17,7 +18,7 @@ const AuthContext = createContext<AuthData>({
 
 export default function AuthProvider({ children }: PropsWithChildren) {
   const [session, setSession] = React.useState<Session | null>(null);
-  const [profile, setProfile] = React.useState(null);
+  const [profile, setProfile] = React.useState<Tables<"profiles"> | null>(null);
   const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -26,15 +27,15 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         data: { session },
       } = await supabase.auth.getSession();
       setSession(session);
-      
+
       if (session) {
         // fetch profile
         const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
-        setProfile(data || null);
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+        if (data) setProfile(data);
       }
       setLoading(false);
     };
@@ -46,7 +47,9 @@ export default function AuthProvider({ children }: PropsWithChildren) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ session, loading, profile, isAdmin: profile?.group === "ADMIN" }}>
+    <AuthContext.Provider
+      value={{ session, loading, profile, isAdmin: profile?.group === "ADMIN" }}
+    >
       {children}
     </AuthContext.Provider>
   );

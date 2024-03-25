@@ -6,7 +6,7 @@ import { router } from "expo-router";
 import { Button } from "@rneui/themed";
 
 const CartListItems = () => {
-  const { items, total, checkout } = useCart();
+  const { items, total, checkout, isCheckingOut } = useCart();
   return (
     <View>
       {items.length === 0 && (
@@ -29,6 +29,7 @@ const CartListItems = () => {
         />
       ) : (
         <Button
+          loading={isCheckingOut}
           title="CheckOut"
           onPress={checkout}
           containerStyle={{ marginTop: 10 }}

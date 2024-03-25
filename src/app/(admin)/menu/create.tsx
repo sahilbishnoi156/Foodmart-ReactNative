@@ -60,6 +60,7 @@ const CreateProductScreen = () => {
     const data = useProduct(id);
     product = data.data;
   }
+  console.log(product?.image);
   const router = useRouter();
 
   //! Local States
@@ -67,6 +68,7 @@ const CreateProductScreen = () => {
     !isUpdating ? defaultPizzaImage : product?.image || defaultPizzaImage
   );
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [imageIsChanged, setImageIsChanged] = React.useState(false);
 
   //! Custom Hook
   const { mutate: insertProduct } = useInsertProduct();
@@ -75,12 +77,16 @@ const CreateProductScreen = () => {
   //! Create or update the product
   const handleOnSubmit = async (data: any) => {
     setIsSubmitting(true);
-    const newProduct = {
+    let newProduct = {
       ...product,
       name: data.productName,
       price: parseFloat(data.productPrice),
       image: image,
     };
+    if (imageIsChanged) {
+      const updatedImage = await uploadImage();
+      newProduct.image = updatedImage!;
+    }
     try {
       if (isUpdating) {
         updateProduct(newProduct, {
@@ -93,16 +99,12 @@ const CreateProductScreen = () => {
           },
         });
       } else {
-        const uploadedImage = await uploadImage();
-        insertProduct(
-          { ...newProduct, image: uploadedImage },
-          {
-            onSuccess: () => {
-              router.back();
-              setIsSubmitting(false);
-            },
-          }
-        );
+        insertProduct(newProduct, {
+          onSuccess: () => {
+            router.back();
+            setIsSubmitting(false);
+          },
+        });
       }
     } catch (error) {
       console.log(error);
@@ -121,6 +123,7 @@ const CreateProductScreen = () => {
     });
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      setImageIsChanged(true);
     }
   };
 

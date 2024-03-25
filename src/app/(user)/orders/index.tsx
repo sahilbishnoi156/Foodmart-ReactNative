@@ -59,11 +59,9 @@ const UserOrders = () => {
   return (
     <View>
       <Stack.Screen options={{title:"My Orders"}}/>
-      {orders.length === 0 && (
-        <Text style={styles.noOrders}>No Orders Yet</Text>
-      )}
       <FlatList
         data={orders}
+        ListEmptyComponent={<Text style={styles.noOrders}>No Orders Yet</Text>}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -85,7 +83,7 @@ export default UserOrders;
 const styles = StyleSheet.create({
   noOrders: {
     fontSize: 20,
-    fontWeight: "500",
+    fontWeight: "600",
   },
   skeleton: {
     borderRadius: 10,

@@ -25,7 +25,6 @@ export default function MenuStack() {
                   )}
                 </Pressable>
               </Link>
-              <Icon name="logout" onPress={()=>supabase.auth.signOut()}/>
             </>
           );
         },

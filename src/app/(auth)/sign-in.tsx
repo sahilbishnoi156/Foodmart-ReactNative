@@ -26,6 +26,7 @@ const CreateProductScreen = () => {
       email: data.email,
       password: data.password,
     });
+    console.log(error);
 
     if (error) {
       Alert.alert(error.message);

@@ -4,6 +4,7 @@ import { randomUUID } from "expo-crypto";
 import { useInsertOrder } from "../api/orders";
 import { router } from "expo-router";
 import { useInsertOrderitems } from "../api/orderItems";
+import { initialisePaymentSheet, openPaymentSheet } from "../lib/stripe";
 
 //! Cart Types
 type CartType = {
@@ -12,6 +13,7 @@ type CartType = {
   updateQuantity: (id: string, amount: -1 | 1) => void;
   total: number;
   checkout: () => void;
+  isCheckingOut: boolean;
 };
 
 //! Cart Context
@@ -21,6 +23,7 @@ export const CartContext = createContext<CartType>({
   updateQuantity: () => {},
   total: 0,
   checkout: () => {},
+  isCheckingOut: false,
 });
 
 //! Provider
@@ -28,6 +31,7 @@ const CartProvider = ({ children }: PropsWithChildren) => {
   //* Custom Hooks
   const { mutate: insertOrder } = useInsertOrder();
   const { mutate: insertOrderItems } = useInsertOrderitems();
+  const [isCheckingOut, setIsCheckingOut] = React.useState(false);
 
   //* Provider States
   //! All cart items
@@ -71,12 +75,20 @@ const CartProvider = ({ children }: PropsWithChildren) => {
   );
 
   //! Checkout and save to database
-  const checkout = () => {
+  const checkout = async () => {
+    setIsCheckingOut(true);
+    await initialisePaymentSheet(Math.floor(total * 100));
+    const payed = await openPaymentSheet();
+
+    if (!payed) {
+      setIsCheckingOut(false);
+      return;
+    }
     insertOrder({ total }, { onSuccess: saveOrderItems });
   };
 
   //! Saving items of order to database
-  const saveOrderItems = (order: Tables<'orders'>) => {
+  const saveOrderItems = (order: Tables<"orders">) => {
     const orderItems = items.map((cartItem) => ({
       order_id: order.id,
       product_id: cartItem.product_id,
@@ -88,6 +100,7 @@ const CartProvider = ({ children }: PropsWithChildren) => {
       onSuccess() {
         setItems([]);
         router.push(`/(user)/orders/${order.id}`);
+        setIsCheckingOut(false);
       },
     });
   };
@@ -100,6 +113,7 @@ const CartProvider = ({ children }: PropsWithChildren) => {
         addItem,
         updateQuantity,
         total: total,
+        isCheckingOut,
       }}
     >
       {children}

@@ -49,12 +49,9 @@ export default function ProductLists() {
   }
 
   return (
-    <View style={styles.container}>
-      {products?.length === 0 && (
-        <Text style={styles.noProdText}>No Products Available</Text>
-      )}
       <FlatList
         data={products}
+        ListEmptyComponent={<Text style={styles.noProdText}>No Products Available</Text>}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -66,10 +63,9 @@ export default function ProductLists() {
           )
         }
         numColumns={2}
-        contentContainerStyle={{ gap: 10 }}
+        contentContainerStyle={{ gap: 10, padding: 10 }}
         columnWrapperStyle={{ gap: 10 }}
       />
-    </View>
   );
 }
 
@@ -83,9 +79,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  container: {
-    padding: 10,
   },
   noProdText: {
     fontSize: 20,
