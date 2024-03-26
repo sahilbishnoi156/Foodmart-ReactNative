@@ -5,9 +5,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { stripe } from '../_utils/stripe.ts';
 import { createOrRetrieveProfile } from '../_utils/supabase.ts';
-
-console.log('Hello from Functions!');
-
 serve(async (req: Request) => {
   try {
     const { amount } = await req.json();
@@ -22,8 +19,9 @@ serve(async (req: Request) => {
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: amount,
-      currency: 'usd',
+      currency: 'inr',
       customer: customer,
+      description: "payment",
     });
 
     const res = {

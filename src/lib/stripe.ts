@@ -10,7 +10,6 @@ const fetchPaymentSheetParams = async (amount: number) => {
     body: { amount },
   });
   if (data) {
-    console.log(data);
     return data;
   }
   Alert.alert('Error fetching payment sheet params');
@@ -18,7 +17,6 @@ const fetchPaymentSheetParams = async (amount: number) => {
 };
 
 export const initialisePaymentSheet = async (amount: number) => {
-  console.log('Initialising payment sheet, for: ', amount);
 
   const { paymentIntent, publishableKey, customer, ephemeralKey } =
     await fetchPaymentSheetParams(amount);

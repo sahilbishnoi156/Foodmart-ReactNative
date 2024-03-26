@@ -2,6 +2,7 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -11,10 +12,9 @@ import React from "react";
 import { useAuth } from "@/src/providers/AuthProvider";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { Button, Icon } from "@rneui/themed";
+import { Button, CheckBox, Chip, Icon } from "@rneui/themed";
 import Colors from "@/src/constants/Colors";
 import RemoteImage from "@/src/components/Orders/RemoteImage";
-import { defaultPizzaImage } from "@/src/constants/ExtraVariables";
 import { supabase } from "@/src/lib/supabase";
 import { useUpdateProfile } from "@/src/api/user";
 import { Stack } from "expo-router";
@@ -29,8 +29,9 @@ const userSchema = Yup.object().shape({
 
 const Profile = () => {
   //! Getting user by custom hook
-  const { loading, profile, session } = useAuth();
+  const { loading, profile, session, isAdmin } = useAuth();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [userIsAdmin, setUserIsAdmin] = React.useState(isAdmin);
   const { mutate: updateProfile } = useUpdateProfile();
 
   //! Submitting user form
@@ -55,7 +56,7 @@ const Profile = () => {
     </View>;
   }
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Stack.Screen
         options={{
           headerRight: () => {
@@ -120,6 +121,7 @@ const Profile = () => {
                 },
               ]}
               value={values.fullName}
+              editable={false}
               onChangeText={handleChange("fullName")}
             />
             {touched.fullName && errors.fullName && (
@@ -130,6 +132,13 @@ const Profile = () => {
               placeholder="Email"
               style={styles.input}
               value={session?.user?.email}
+              editable={false}
+            />
+            <Text style={styles.label}>Role (can't be changed)</Text>
+            <TextInput
+              placeholder="Role"
+              style={styles.input}
+              value={profile?.group}
               editable={false}
             />
             <View style={styles.user}>
@@ -152,7 +161,7 @@ const Profile = () => {
           </View>
         )}
       </Formik>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -162,8 +171,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
+    padding: 25,
   },
   image: {
     width: 180,
