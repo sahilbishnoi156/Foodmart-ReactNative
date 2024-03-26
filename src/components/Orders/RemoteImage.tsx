@@ -42,7 +42,6 @@ const RemoteImage = ({ path, fallback, ...imageProps }: RemoteImageProps) => {
       {...imageProps}
       containerStyle={imageProps.style}
       placeholderStyle={{ height: "100%", backgroundColor: "transparent" }}
-      resizeMode="contain"
       PlaceholderContent={<ActivityIndicator size={"large"} color={"blue"} />}
     />
   );

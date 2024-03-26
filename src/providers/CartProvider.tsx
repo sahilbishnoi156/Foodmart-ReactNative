@@ -5,6 +5,7 @@ import { useInsertOrder } from "../api/orders";
 import { router } from "expo-router";
 import { useInsertOrderitems } from "../api/orderItems";
 import { initialisePaymentSheet, openPaymentSheet } from "../lib/stripe";
+import { notfiyAdminWhenOrderIsCreated } from "../lib/notifications";
 
 //! Cart Types
 type CartType = {
@@ -97,10 +98,11 @@ const CartProvider = ({ children }: PropsWithChildren) => {
     }));
 
     insertOrderItems(orderItems, {
-      onSuccess() {
+      async onSuccess() {
         setItems([]);
-        router.push(`/(user)/orders/${order.id}`);
+        await notfiyAdminWhenOrderIsCreated(order)
         setIsCheckingOut(false);
+        router.push(`/(user)/orders/${order.id}`);
       },
     });
   };

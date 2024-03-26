@@ -1,31 +1,33 @@
-import { supabase } from "@/src/lib/supabase";
-import { useAuth } from "@/src/providers/AuthProvider";
+import { useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import React from "react";
+import { supabase } from "@/src/lib/supabase";
 
 export const useInsertOrderSubscription = () => {
   const queryClient = useQueryClient();
-  //! Real time subscription
-  React.useEffect(() => {
-    const ordersSubsription = supabase
+
+  useEffect(() => {
+    const ordersSubscription = supabase
       .channel("custom-insert-channel")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "orders" },
         (payload) => {
+          console.log("Change received!", payload);
           queryClient.invalidateQueries({ queryKey: ["orders"] });
         }
       )
       .subscribe();
+
     return () => {
-      ordersSubsription.unsubscribe();
+      ordersSubscription.unsubscribe();
     };
   }, []);
 };
+
 export const useUpdateOrderSubscription = (id: number) => {
   const queryClient = useQueryClient();
-  //! Real time subscription
-  React.useEffect(() => {
+
+  useEffect(() => {
     const orders = supabase
       .channel("custom-filter-channel")
       .on(

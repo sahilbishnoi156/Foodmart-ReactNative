@@ -1,6 +1,7 @@
 import {
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -24,6 +25,7 @@ import * as FileSystem from "expo-file-system";
 import { randomUUID } from "expo-crypto";
 import { supabase } from "@/src/lib/supabase";
 import { decode } from "base64-arraybuffer";
+import RemoteImage from "@/src/components/Orders/RemoteImage";
 
 //* FORM validation
 const productSchema = Yup.object().shape({
@@ -60,7 +62,6 @@ const CreateProductScreen = () => {
     const data = useProduct(id);
     product = data.data;
   }
-  console.log(product?.image);
   const router = useRouter();
 
   //! Local States
@@ -146,12 +147,17 @@ const CreateProductScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Stack.Screen
         options={{ title: isUpdating ? "Update product" : "Create product" }}
       />
       <View>
-        <Image source={{ uri: image }} style={styles.image} />
+        <RemoteImage
+          path={image}
+          fallback={defaultPizzaImage}
+          style={styles.image}
+          resizeMode="contain"
+        />
         <Pressable style={styles.selectButton} onPress={pickImage}>
           {({ pressed }) => (
             <>
@@ -214,7 +220,7 @@ const CreateProductScreen = () => {
             )}
             <Text style={styles.label}>Price</Text>
             <TextInput
-              placeholder="Price in $"
+              placeholder="Price in ₹"
               style={[
                 styles.input,
                 {
@@ -247,7 +253,7 @@ const CreateProductScreen = () => {
           </>
         )}
       </Formik>
-    </View>
+    </ScrollView>
   );
 };
 
@@ -255,11 +261,10 @@ export default CreateProductScreen;
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 10,
   },
   image: {
-    width: "50%",
+    width: "100%",
     aspectRatio: 1,
     alignSelf: "center",
     borderRadius: 100,

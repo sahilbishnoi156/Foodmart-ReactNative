@@ -1,10 +1,6 @@
 import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Link, Redirect, Tabs } from "expo-router";
-import { Pressable } from "react-native";
-
-import Colors from "@/src/constants/Colors";
-import { useColorScheme } from "@/src/components/useColorScheme";
+import { Redirect, Tabs } from "expo-router";
 import { useClientOnlyValue } from "@/src/components/useClientOnlyValue";
 import { useAuth } from "@/src/providers/AuthProvider";
 
@@ -26,12 +22,6 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.light.background,
-        tabBarInactiveTintColor: "gainsboro",
-        tabBarStyle: {
-          backgroundColor: Colors.light.tint,
-          
-        },
         headerShown: useClientOnlyValue(false, true),
       }}
     >

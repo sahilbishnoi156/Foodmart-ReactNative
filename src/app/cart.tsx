@@ -7,20 +7,17 @@ import Button from "../components/Button";
 
 const Cart = () => {
   return (
-    <View style={styles.container}>
+    <>
       <CartListItems />
       <StatusBar
         animated={true}
         backgroundColor="#61dafb"
       />
-    </View>
+    </>
   );
 };
 
 export default Cart;
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 10,
-  },
 });

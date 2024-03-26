@@ -5,15 +5,15 @@ import {
   ThemeProvider,
 } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Redirect, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { useColorScheme } from "@/src/components/useColorScheme";
 import CartProvider from "../providers/CartProvider";
-import AuthProvider, { useAuth } from "../providers/AuthProvider";
+import AuthProvider from "../providers/AuthProvider";
 import QueryProvider from "../providers/QueryProivder";
 import { Icon } from "@rneui/base";
-import { StripeProvider } from '@stripe/stripe-react-native'
+import { StripeProvider } from "@stripe/stripe-react-native";
 import { NotificationProvider } from "../providers/NotificationProvider";
 
 export {
@@ -62,23 +62,36 @@ function RootLayoutNav() {
       >
         <AuthProvider>
           <QueryProvider>
-          <NotificationProvider>
-            <CartProvider>
-              <Stack>
-                <Stack.Screen name="index" options={{ title: "Food Mart" }} />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="(admin)" options={{ headerShown: false }} />
-                <Stack.Screen name="(user)" options={{ headerShown: false }} />
-                <Stack.Screen
-                  name="cart"
-                  options={{
-                    presentation: "modal",
-                    title: "Cart",
-                    headerRight: () => <Icon name="shopping-cart" />,
-                  }}
-                />
-              </Stack>
-            </CartProvider>
+            <NotificationProvider>
+              <CartProvider>
+                <Stack>
+                  <Stack.Screen name="index" options={{ title: "Food Mart" }} />
+                  <Stack.Screen
+                    name="(auth)"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="(admin)"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="(user)"
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="cart"
+                    options={{
+                      presentation: "modal",
+                      title: "Cart",
+                      headerRight: () => (
+                        <>
+                          <Icon name="shopping-cart" />
+                        </>
+                      ),
+                    }}
+                  />
+                </Stack>
+              </CartProvider>
             </NotificationProvider>
           </QueryProvider>
         </AuthProvider>

@@ -30,10 +30,10 @@ export const NotificationProvider = ({ children }: PropsWithChildren) => {
     if (!newToken) return;
 
     // update to database
-    await supabase
+    const {data, error} = await supabase
       .from("profiles")
       .update({ expo_push_token: newToken })
-      .eq("id", profile?.id!);
+      .eq("id", profile?.id!).single();
   };
 
   //! Notification listener
@@ -47,7 +47,7 @@ export const NotificationProvider = ({ children }: PropsWithChildren) => {
 
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
+        // console.log(response);
       });
 
     return () => {
@@ -61,7 +61,5 @@ export const NotificationProvider = ({ children }: PropsWithChildren) => {
       }
     };
   }, []);
-
-  console.log(expoPushToken, "\n", notification);
   return <>{children}</>;
 };

@@ -83,7 +83,6 @@ export const useUpdateOrder = () => {
       return updatedProduct;
     },
     async onSuccess(_, { id }) {
-      await queryClient.invalidateQueries({ queryKey: ["orders"] });
       await queryClient.invalidateQueries({ queryKey: ["orders", id] });
     },
   });

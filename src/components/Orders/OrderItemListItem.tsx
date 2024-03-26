@@ -21,7 +21,7 @@ const OrderItemListItem = ({ item }: OrderItemListItemProps) => {
       <View style={{ flex: 1 }}>
         <Text style={styles.title}>{item?.products?.name}</Text>
         <View style={styles.subtitleContainer}>
-          <Text style={styles.price}>${item?.products?.price.toFixed(2)}</Text>
+          <Text style={styles.price}>₹{item?.products?.price.toFixed(2)}</Text>
           <Text>Size: {item?.size}</Text>
         </View>
       </View>
@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 5,
+    paddingHorizontal: 15,
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',

@@ -119,7 +119,7 @@ const ProductDetailScreen = () => {
       />
 
       <Text style={styles.title}>{product.name}</Text>
-      <Text style={styles.price}>Price: ${product.price}</Text>
+      <Text style={styles.price}>Price: ₹{product.price}</Text>
 
       <Button
         onPress={confirmDeleteProduct}

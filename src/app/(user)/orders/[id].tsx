@@ -86,7 +86,7 @@ export default function OrderDetailsScreen() {
           );
         }}
         ListFooterComponent={()=>{
-          return <Text style={styles.price}>Total: ${totalPrice}</Text>
+          return <Text style={styles.price}>Total: ₹{totalPrice}</Text>
         }}
       />
     </View>

@@ -84,7 +84,7 @@ const ProductDetailScreen = () => {
         style={styles.image}
         resizeMode="contain"
       />
-      <Text>Select size</Text>
+      <Text style={{ fontWeight: "100", fontSize: 17 }}>Select size</Text>
       <View style={styles.productSizes}>
         {sizes.map((size) => (
           <Pressable
@@ -93,14 +93,17 @@ const ProductDetailScreen = () => {
             style={[
               styles.productSize,
               {
-                backgroundColor: selectedSize === size ? "gainsboro" : "white",
+                backgroundColor: selectedSize === size ? Colors.light.tint : "white",
               },
             ]}
           >
             <Text
               style={[
                 styles.productSizeText,
-                { color: selectedSize === size ? "black" : "grey" },
+                { 
+                  color: selectedSize === size ? "white" : "grey",
+                  fontWeight: selectedSize === size ? "500" : "100"
+                 },
               ]}
             >
               {size}
@@ -108,7 +111,10 @@ const ProductDetailScreen = () => {
           </Pressable>
         ))}
       </View>
-      <Text style={styles.price}>Price: ${product?.price}</Text>
+      <Text style={styles.price}>
+        <Text style={{ fontWeight: "100", fontSize: 17 }}>Amount: </Text>₹
+        {product?.price}
+      </Text>
       <Button
         onPress={handleCartButtonClick}
         radius={14}
@@ -144,6 +150,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-around",
     marginVertical: 10,
+    fontSize: 1,
   },
   productSize: {
     borderRadius: 25,
@@ -159,6 +166,6 @@ const styles = StyleSheet.create({
   price: {
     color: "black",
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: "500",
   },
 });

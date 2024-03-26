@@ -3,6 +3,7 @@ import { useOrderDetails, useUpdateOrder } from "@/src/api/orders";
 import OrderItemListItem from "@/src/components/Orders/OrderItemListItem";
 import OrderListItem from "@/src/components/Orders/OrderListItem";
 import Colors from "@/src/constants/Colors";
+import { notifyUserAboutOrderUpdate } from "@/src/lib/notifications";
 import { OrderStatusList } from "@/src/types";
 import { Button } from "@rneui/themed";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
@@ -42,9 +43,9 @@ export default function OrderDetailsScreen() {
       },
       {
         onSuccess: async () => {
-          // if (order) {
-          //   await notifyUserAboutOrderUpdate({ ...order, status });
-          // }
+          if (order) {
+            await notifyUserAboutOrderUpdate({ ...order, status });
+          }
           setIsUpdating(false);
         },
       }
@@ -115,7 +116,7 @@ export default function OrderDetailsScreen() {
         )}
         ListFooterComponent={() => (
           <>
-            <Text style={styles.price}>Total Price: ${totalPrice}</Text>
+            <Text style={styles.price}>Total Price: ₹{totalPrice}</Text>
             <Text style={{ fontWeight: "bold" }}>Status</Text>
             <View
               style={{

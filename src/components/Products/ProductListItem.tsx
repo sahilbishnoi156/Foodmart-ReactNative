@@ -26,7 +26,7 @@ const ProductListItem = ({ product }: ProductListItemProps) => {
           resizeMode="contain"
         />
         <Text style={styles.title}>{product.name}</Text>
-        <Text style={styles.price}>${product.price}</Text>
+        <Text style={styles.price}>₹{product.price}</Text>
       </Pressable>
     </Link>
   );
@@ -47,12 +47,11 @@ const styles = StyleSheet.create({
     aspectRatio: 1,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginVertical: 10,
+    fontSize: 19,
+    fontWeight: "500",
   },
   price: {
-    color: Colors.light.tint,
-    fontWeight: "bold",
+    color: 'black',
+    fontSize: 16,
   },
 });
