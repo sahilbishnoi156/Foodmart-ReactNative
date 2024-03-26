@@ -8,13 +8,13 @@ import { useFonts } from "expo-font";
 import { Redirect, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-
 import { useColorScheme } from "@/src/components/useColorScheme";
 import CartProvider from "../providers/CartProvider";
 import AuthProvider, { useAuth } from "../providers/AuthProvider";
 import QueryProvider from "../providers/QueryProivder";
 import { Icon } from "@rneui/base";
 import { StripeProvider } from '@stripe/stripe-react-native'
+import { NotificationProvider } from "../providers/NotificationProvider";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -62,6 +62,7 @@ function RootLayoutNav() {
       >
         <AuthProvider>
           <QueryProvider>
+          <NotificationProvider>
             <CartProvider>
               <Stack>
                 <Stack.Screen name="index" options={{ title: "Food Mart" }} />
@@ -78,6 +79,7 @@ function RootLayoutNav() {
                 />
               </Stack>
             </CartProvider>
+            </NotificationProvider>
           </QueryProvider>
         </AuthProvider>
       </StripeProvider>
