@@ -13,7 +13,6 @@ import { Skeleton } from "@rneui/themed";
 import OrderListItem from "@/src/components/Orders/OrderListItem";
 import { useAuth } from "@/src/providers/AuthProvider";
 import { Stack } from "expo-router";
-import { useUpdateOrderSubscription } from "@/src/api/orders/subscriptions";
 
 const UserOrders = () => {
   const { data: orders, isLoading, error } = useUserOrderList();

@@ -1,6 +1,5 @@
 import {
   Alert,
-  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -17,6 +16,9 @@ import { Button } from "@rneui/themed";
 //* FORM validation
 const formSchema = Yup.object().shape({
   email: Yup.string().email().required("Email is required"),
+  full_name: Yup.string()
+    .required("Name is required")
+    .min(5, "Should be at least 5 characters"),
   password: Yup.string()
     .required("Password is required")
     .min(8, "Should be at least 8 characters"),
@@ -28,15 +30,21 @@ const CreateProductScreen = () => {
   //! handling signUn
   const handleOnSubmit = async (data: any) => {
     setIsSubmitting(true);
-    const { error } = await supabase.auth.signUp({
+    const { data: userData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
     });
 
+    //! Updating the name in profile table
+    await supabase
+    .from("profiles")
+    .update({ full_name: data.full_name })
+    .eq("id", userData?.session?.user?.id!);
+
     if (error) {
       Alert.alert(error.message);
-      setIsSubmitting(false);
-      return;
+      setIsSubmitting(false); 
+     return;
     }
   };
 
@@ -45,6 +53,7 @@ const CreateProductScreen = () => {
       <Stack.Screen options={{ title: "Sign Up" }} />
       <Formik
         initialValues={{
+          full_name: "",
           email: "",
           password: "",
         }}
@@ -63,6 +72,25 @@ const CreateProductScreen = () => {
           /* and other goodies */
         }) => (
           <>
+            <Text style={styles.label}>Full Name</Text>
+            <TextInput
+              placeholder="Jhon Doe"
+              style={[
+                styles.input,
+                {
+                  borderColor:
+                    touched.full_name && errors.full_name
+                      ? "#ff9999"
+                      : "#d1d1d1",
+                  borderWidth: 1,
+                },
+              ]}
+              value={values.full_name}
+              onChangeText={handleChange("full_name")}
+            />
+            {touched.full_name && errors.full_name && (
+              <Text style={styles.errorText}>{errors.full_name}</Text>
+            )}
             <Text style={styles.label}>Email</Text>
             <TextInput
               placeholder="joe@example.com"

@@ -2,6 +2,7 @@ import {
   ActivityIndicator,
   Alert,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,47 +17,70 @@ import { Button, CheckBox, Chip, Icon } from "@rneui/themed";
 import Colors from "@/src/constants/Colors";
 import RemoteImage from "@/src/components/Orders/RemoteImage";
 import { supabase } from "@/src/lib/supabase";
-import { useUpdateProfile } from "@/src/api/user";
+import { useGetProfile, useUpdateProfile } from "@/src/api/user";
 import { Stack } from "expo-router";
+import { useQueryClient } from "@tanstack/react-query";
 
 //* FORM validation
 const userSchema = Yup.object().shape({
   fullName: Yup.string()
     .min(2, "Should be minimum of 2 characters")
-    .max(16, "Should be maximum of 16 characters")
-    .required(),
+    .max(16, "Should be maximum of 16 characters"),
 });
 
 const Profile = () => {
   //! Getting user by custom hook
-  const { loading, profile, session, isAdmin } = useAuth();
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [userIsAdmin, setUserIsAdmin] = React.useState(isAdmin);
+  const { session, loading } = useAuth();
+
+
+  const { data: profile } = useGetProfile(session?.user?.id!);
   const { mutate: updateProfile } = useUpdateProfile();
+  const [refreshing, setRefreshing] = React.useState(false);
+  const queryClient = useQueryClient();
+
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({
+      queryKey: ["profiles", { userId: session?.user?.id }],
+    });
+    setRefreshing(false);
+  }, []);
+
+  //! Local States
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   //! Submitting user form
   const handleOnSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
-      updateProfile(data, {
-        onSuccess: () => {
-          setIsSubmitting(false);
-        },
-      });
+      console.log("newdata", data);
+      // updateProfile(data, {
+      //   onSuccess: () => {
+      //     setIsSubmitting(false);
+      //   },
+      // });
+      setIsSubmitting(false);
     } catch (error) {
       console.log(error);
       setIsSubmitting(false);
     }
   };
 
+  
   //! while user is loading
   if (loading) {
     <View style={styles.container}>
       <ActivityIndicator size={"large"} />
     </View>;
   }
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView
+      contentContainerStyle={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <Stack.Screen
         options={{
           headerRight: () => {
@@ -99,67 +123,73 @@ const Profile = () => {
         />
       </View>
       <Formik
-        initialValues={{
-          fullName: profile?.full_name || "",
-        }}
         validationSchema={userSchema}
         onSubmit={(values) => {
           handleOnSubmit(values);
         }}
+        initialValues={{
+          full_name: profile?.full_name || "",
+        }}
       >
-        {({ values, errors, touched, isValid, handleChange, handleSubmit }) => (
-          <View style={{ width: "100%" }}>
-            <Text style={styles.label}>Full Name</Text>
-            <TextInput
-              placeholder="Full Name"
-              style={[
-                styles.input,
-                {
-                  borderColor:
-                    touched.fullName && errors.fullName ? "#ff9999" : "#d1d1d1",
-                  borderWidth: 1,
-                },
-              ]}
-              value={values.fullName}
-              editable={false}
-              onChangeText={handleChange("fullName")}
-            />
-            {touched.fullName && errors.fullName && (
-              <Text style={styles.errorText}>{errors.fullName.toString()}</Text>
-            )}
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              placeholder="Email"
-              style={styles.input}
-              value={session?.user?.email}
-              editable={false}
-            />
-            <Text style={styles.label}>Role (can't be changed)</Text>
-            <TextInput
-              placeholder="Role"
-              style={styles.input}
-              value={profile?.group}
-              editable={false}
-            />
-            <View style={styles.user}>
-              <Text style={styles.userText}>
-                Since: {new Date(session?.user?.created_at!).toDateString()}
-              </Text>
+        {({ values, errors, touched, isValid, handleChange, handleSubmit }) => {
+          return (
+            <View style={{ width: "100%" }}>
+              <Text style={styles.label}>Full Name</Text>
+              <TextInput
+                placeholder="Full Name"
+                style={[
+                  styles.input,
+                  {
+                    borderColor:
+                      touched.full_name && errors.full_name
+                        ? "#ff9999"
+                        : "#d1d1d1",
+                    borderWidth: 1,
+                  },
+                ]}
+                editable={false}
+                value={values.full_name}
+                onChangeText={handleChange("full_name")} // Change this line
+              />
+              {touched.full_name && errors.full_name && (
+                <Text style={styles.errorText}>
+                  {errors.full_name.toString()}
+                </Text>
+              )}
+              <Text style={styles.label}>Email</Text>
+              <TextInput
+                placeholder="Email"
+                style={styles.input}
+                value={session?.user?.email}
+                editable={false}
+              />
+              <Text style={styles.label}>Role (can't be changed)</Text>
+              <TextInput
+                placeholder="Role"
+                style={styles.input}
+                value={profile?.group}
+                editable={false}
+              />
+              <View style={styles.user}>
+                <Text style={styles.userText}>
+                  Since: {new Date(session?.user?.created_at!).toDateString()}
+                </Text>
+              </View>
+              <Button
+                onPress={() => handleSubmit()}
+                radius={12}
+                loading={isSubmitting}
+                raised
+                disabled={!isValid || true}
+                size="lg"
+                color={isValid ? Colors.light.tint : ""}
+                containerStyle={{ marginTop: 20 }}
+              >
+                Update
+              </Button>
             </View>
-            <Button
-              onPress={() => handleSubmit()}
-              radius={12}
-              loading={isSubmitting}
-              raised
-              disabled={!isValid || true}
-              size="lg"
-              color={isValid ? Colors.light.tint : ""}
-              containerStyle={{ marginTop: 20 }}
-            >
-              Update
-            </Button>
-          </View>
-        )}
+          );
+        }}
       </Formik>
     </ScrollView>
   );
